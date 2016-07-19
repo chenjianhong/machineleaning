@@ -23,7 +23,7 @@ def img2vector(file_hander):
 
 def classify(x,data_set,labels,k):
     data_set_size = data_set.shape[0]  # 获取行数
-    diff_mat = np.tile(x,(data_set_size,1)) - data_set
+    diff_mat = np.tile(x,(data_set_size,1)) - data_set  # 将数组重复data_set_size维，每个数组里重复1次
     sq_diff_mat = diff_mat**2
     sq_distances = sq_diff_mat.sum(axis=1) # 行向量相加
     distances = sq_distances**0.5
