@@ -20,9 +20,32 @@ def majority_cnt(class_list):
     return sorted_class_count[0][0]
 
 
-def choose_best_feature_to_split():
+def calc_shannon_ent(data_set):
     pass
 
+
+def split_data_set(data_set, i, v):
+    pass
+
+
+def choose_best_feature_to_split(data_set):
+    num_features = len(data_set) - 1
+    base_entropy = calc_shannon_ent(data_set)
+    best_info_gain = 0
+    best_feature = -1
+    for i in range(num_features):
+        feat_list = [j[i] for j in data_set]
+        unique_vals = set(feat_list)
+        new_entropy = 0
+        for v in unique_vals:
+            sub_data_set = split_data_set(data_set,i,v)
+            prob = len(sub_data_set)/float(len(data_set))
+            new_entropy += prob * calc_shannon_ent(sub_data_set)
+        info_gain = base_entropy - new_entropy
+        if info_gain > best_info_gain:
+            best_info_gain = info_gain
+            best_feature = i
+    return best_feature
 
 def create_tree(lenses, lenses_labels):
     class_list = [i[-1] for i in lenses]
