@@ -2,9 +2,14 @@
 '''
 k 近邻算法：
 优点：
-1.精度高、对异常值不敏感，无数据输入假定
+    1.精度高、对异常值不敏感，无数据输入假定
 缺点：
-1.计算复杂度高、空间复杂度高
+    1.计算复杂度高、空间复杂度高
+程序计算逻辑：
+    1.获取所有的标注样本特征及其label
+    2.所有特征值减去待预测特征值，然后各特征求平方和
+    3.开方后排序，取最小的k个值
+    4.返回k个值里最多的label
 '''
 import os
 import zipfile
@@ -36,7 +41,6 @@ def classify(x,data_set,labels,k):
     return sorted_class_count[0][0]
 
 
-
 def run():
     z = zipfile.ZipFile("./bookdemo/Ch02/digits.zip")
     class_label = list()
@@ -64,7 +68,6 @@ def run():
     print 'total_count:%s' % total_count
     print 'error_count:%s' % error_count
     print 'error rate:%s' % (error_count/float(total_count))
-
 
 
 if __name__=="__main__":

@@ -5,7 +5,10 @@ python list 的count用法：计算列表项的出现次数
 >>> a.count(1)
 
 '''
+import copy
 import operator
+
+import math
 
 __author__ = 'Administrator'
 
@@ -21,15 +24,31 @@ def majority_cnt(class_list):
 
 
 def calc_shannon_ent(data_set):
-    pass
+    data_count = len(data_set)
+    label_count = dict()
+    for f in data_set:
+        current_label = f[-1]
+        if current_label not in label_count: label_count[current_label] = 0
+        label_count[current_label] += 1
+    shannon_ent = 0
+    for l in label_count:
+        prob = label_count[l]*1.0/data_count
+        shannon_ent -= prob * math.log(prob,2)
+    return shannon_ent
 
 
 def split_data_set(data_set, i, v):
-    pass
+    split_result = list()
+    for d in data_set:
+        if d[i] == v:
+            reduced_feature = d[:i]
+            reduced_feature.extend(d[i+1:])
+            split_result.append(reduced_feature)
+    return split_result
 
 
 def choose_best_feature_to_split(data_set):
-    num_features = len(data_set) - 1
+    num_features = len(data_set[0]) - 1
     base_entropy = calc_shannon_ent(data_set)
     best_info_gain = 0
     best_feature = -1
@@ -47,6 +66,7 @@ def choose_best_feature_to_split(data_set):
             best_feature = i
     return best_feature
 
+
 def create_tree(lenses, lenses_labels):
     class_list = [i[-1] for i in lenses]
     if class_list.count(class_list[0]) == len(class_list):  # 计算是否为同一种分类
@@ -54,6 +74,25 @@ def create_tree(lenses, lenses_labels):
     if len(lenses[0]) == 1: # 当只有一个特征时停止分割
         return majority_cnt(class_list)
     best_feat = choose_best_feature_to_split(lenses)
+    best_feat_label = lenses_labels[best_feat]
+    my_tree = {best_feat_label:{}}
+    del lenses_labels[best_feat]
+    for f_v in set([i[best_feat] for i in lenses]):
+        sub_labels = lenses_labels[:]
+        my_tree[best_feat_label][f_v] = create_tree(split_data_set(lenses,best_feat,f_v),sub_labels)
+    return my_tree
+
+def classify(input_tree,feat_labels,test_vec):
+    first_feat = input_tree.keys()[0]
+    second_dict = input_tree[first_feat]
+    feat_index = feat_labels.index(first_feat)
+    key = test_vec[feat_index]
+    value_of_feat = second_dict[key]
+    if isinstance(value_of_feat,dict):
+        class_label = classify(value_of_feat,feat_labels,test_vec)
+    else:
+        class_label = value_of_feat
+    return class_label
 
 
 
@@ -61,7 +100,10 @@ def run():
     z = open("./bookdemo/Ch03/lenses.txt")
     lenses = [inst.strip().split('\t') for inst in z.readlines()]
     lenses_labels = ['age','prescript','astigmatic','tear_rate']
-    lenses_tree = create_tree(lenses,lenses_labels)
+    lenses_tree = create_tree(lenses,copy.deepcopy(lenses_labels))
+    print lenses_tree
+    print '*'*100
+    print 'predict label:%s' % classify(lenses_tree,lenses_labels,['presbyopic','myope','yes','normal'])
 
 
 if __name__=="__main__":
