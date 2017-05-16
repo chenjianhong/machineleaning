@@ -46,7 +46,7 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     return weights
 
 def classify_vector(inx,weights):
-    prob = 1/(1+numpy.exp(sum(inx*weights)))
+    prob = sigmoid(sum(inx*weights))
     return 1 if prob > 0.5 else 0
 
 def run():
@@ -57,12 +57,11 @@ def run():
             curr_line = line.strip().split('\t')
             train_feature_list.append([float(i) for i in curr_line[:21]])
             train_label_list.append(float(curr_line[21]))
-    train_weights = sgd(numpy.array(train_feature_list),train_label_list,1000)
+    # train_weights = sgd(numpy.array(train_feature_list),train_label_list,1000)
     train_weights = stocGradAscent1(numpy.array(train_feature_list),train_label_list,1000)
-    print train_weights
     error_count = 0
     total_test_count = 0
-    with open('bookdemo/Ch05/horseColicTraining.txt') as f2:
+    with open('bookdemo/Ch05/horseColicTest.txt') as f2:
         for line in f2:
             total_test_count += 1.0
             curr_line = line.strip().split('\t')
@@ -71,5 +70,29 @@ def run():
     error_rate = error_count/total_test_count
     print 'error count:%s,total count:%s,error rate:%s' % (error_count,total_test_count,error_rate)
 
+def colicTest():
+    frTrain = open('bookdemo/Ch05/horseColicTraining.txt'); frTest = open('bookdemo/Ch05/horseColicTest.txt')
+    trainingSet = []; trainingLabels = []
+    for line in frTrain.readlines():
+        currLine = line.strip().split('\t')
+        lineArr =[]
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        trainingSet.append(lineArr)
+        trainingLabels.append(float(currLine[21]))
+    trainWeights = sgd(numpy.array(trainingSet), trainingLabels, 1000)
+    errorCount = 0; numTestVec = 0.0
+    for line in frTest.readlines():
+        numTestVec += 1.0
+        currLine = line.strip().split('\t')
+        lineArr =[]
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        if int(classify_vector(numpy.array(lineArr), trainWeights))!= int(currLine[21]):
+            errorCount += 1
+    errorRate = (float(errorCount)/numTestVec)
+    print "the error rate of this test is: %f" % errorRate
+    return errorRate
+
 if __name__=="__main__":
-    run()
+    colicTest()
