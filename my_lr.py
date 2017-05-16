@@ -10,3 +10,66 @@
 程序计算逻辑：
     1.
 '''
+import random
+
+import numpy
+
+def sigmoid(inx):
+    return 1.0/(1+numpy.exp(-inx))
+
+def sgd(data_feature_matric,class_labels,num_iter=150):
+    item_count,feature_count = data_feature_matric.shape
+    weights = numpy.ones(feature_count)
+    for j in range(num_iter):
+        data_index = range(item_count)
+        for i in range(item_count):
+            alpha = 4/(1.0+j+i) + 0.0001
+            rand_index = random.randint(0,len(data_index)-1)
+            h = sigmoid(sum(data_feature_matric[rand_index]*weights))
+            error = class_labels[rand_index] - h
+            weights = weights + alpha * error * data_feature_matric[rand_index]
+            del data_index[rand_index]
+    return weights
+
+def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    m,n = dataMatrix.shape
+    weights = numpy.ones(n)   #initialize to all ones
+    for j in range(numIter):
+        dataIndex = range(m)
+        for i in range(m):
+            alpha = 4/(1.0+j+i)+0.0001    #apha decreases with iteration, does not
+            randIndex = int(random.uniform(0,len(dataIndex)))#go to 0 because of the constant
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))
+            error = classLabels[randIndex] - h
+            weights = weights + alpha * error * dataMatrix[randIndex]
+            del(dataIndex[randIndex])
+    return weights
+
+def classify_vector(inx,weights):
+    prob = 1/(1+numpy.exp(sum(inx*weights)))
+    return 1 if prob > 0.5 else 0
+
+def run():
+    train_feature_list = list()
+    train_label_list = list()
+    with open('bookdemo/Ch05/horseColicTraining.txt') as f1:
+        for line in f1:
+            curr_line = line.strip().split('\t')
+            train_feature_list.append([float(i) for i in curr_line[:21]])
+            train_label_list.append(float(curr_line[21]))
+    train_weights = sgd(numpy.array(train_feature_list),train_label_list,1000)
+    train_weights = stocGradAscent1(numpy.array(train_feature_list),train_label_list,1000)
+    print train_weights
+    error_count = 0
+    total_test_count = 0
+    with open('bookdemo/Ch05/horseColicTraining.txt') as f2:
+        for line in f2:
+            total_test_count += 1.0
+            curr_line = line.strip().split('\t')
+            if classify_vector(numpy.array([float(i) for i in curr_line[:21]]),train_weights) != int(float(curr_line[21])):
+                error_count += 1
+    error_rate = error_count/total_test_count
+    print 'error count:%s,total count:%s,error rate:%s' % (error_count,total_test_count,error_rate)
+
+if __name__=="__main__":
+    run()
