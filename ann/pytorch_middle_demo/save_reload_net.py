@@ -17,11 +17,12 @@ def save():
         torch.nn.Linear(30,1)
     )
 
-    optm = torch.optim.SGD(net.parameters(),lr=5e-2)
+    # optm = torch.optim.SGD(net.parameters(),lr=5e-2)
+    optm = torch.optim.Adam(net.parameters())
 
     loss_func = torch.nn.MSELoss()
 
-    for i in range(600):
+    for i in range(100):
         pred = net(x)
         loss = loss_func(pred,y)
         optm.zero_grad()
