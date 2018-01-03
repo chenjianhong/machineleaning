@@ -7,7 +7,7 @@ from torch.autograd import Variable
 import torchvision.transforms as transforms
 
 EPOCH = 1               # train the training data n times, to save time, we just train 1 epoch
-BATCH_SIZE = 64
+BATCH_SIZE = 2
 TIME_STEP = 28          # rnn time step / image height
 INPUT_SIZE = 28         # rnn input size / image width
 LR = 0.01               # learning rate
@@ -24,15 +24,16 @@ class RNN(torch.nn.Module):
         self.rnn = torch.nn.LSTM(
             input_size=INPUT_SIZE,
             hidden_size=64,
-            num_layers=1,
+            num_layers=2,
             batch_first=True
         )
 
         self.out = torch.nn.Linear(64,10)
 
+        self.num = 0
+
     def forward(self, x):
         r_out, (h_n,h_c) = self.rnn(x,None)
-
         out = self.out(r_out[:,-1,:])
         return out
 
@@ -55,6 +56,8 @@ def main():
     test_y = test_data.test_labels.numpy().squeeze()[:2000]  # covert to numpy array
 
     rnn = RNN()
+
+    print(rnn)
 
     optm = torch.optim.Adam(rnn.parameters())
 
