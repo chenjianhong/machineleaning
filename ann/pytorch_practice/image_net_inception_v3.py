@@ -144,9 +144,10 @@ def run():
 
 
 
-    model = torchvision.models.inception_v3(pretrained=False)
+    # model = torchvision.models.inception_v3(pretrained=False)
+    model = torchvision.models.resnet18(pretrained=False)
 
-    # model.cuda()
+    model = torch.nn.DataParallel(model).cuda()
 
 
     train_dir = os.path.join(args.data,'train')
@@ -188,8 +189,9 @@ def run():
         top1 = AverageMeter()
         top5 = AverageMeter()
         for i,(x,y) in enumerate(train_loader):
-            b_x = torch.autograd.Variable(x)
-            b_y = torch.autograd.Variable(y)
+            y = y.cuda()
+            b_x = torch.autograd.Variable(x).cuda()
+            b_y = torch.autograd.Variable(y).cuda()
 
             o = model(b_x)
 
@@ -199,7 +201,7 @@ def run():
             loss.backward()
             optm.step()
 
-            prec1, prec5 = accuracy(o.data, b_y, topk=(1, 5))
+            prec1, prec5 = accuracy(o.data, y, topk=(1, 5))
             batch_time.update(time.time() - prev_end_time)
             data_time.update(time.time() - prev_end_time)
             losses.update(loss.data[0], b_x.size(0))
