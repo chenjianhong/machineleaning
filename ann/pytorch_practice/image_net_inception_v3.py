@@ -198,7 +198,6 @@ def run():
 
         save_checkpoint({
             'epoch': epoch + 1,
-            'arch': args.arch,
             'state_dict': model.state_dict(),
             'best_prec1': best_prec1,
             'optimizer': optm.state_dict(),
