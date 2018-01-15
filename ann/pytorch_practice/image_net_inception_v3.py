@@ -11,7 +11,7 @@ import shutil
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', help='path to dataset')
 parser.add_argument('-b', '--batch_size', help='batch_size', default=60, type=int)
-parser.add_argument('-w', '--workers', default=4, type=int, help='number of data loading workers (default: 4)')
+parser.add_argument('-w', '--workers', default=8, type=int, help='number of data loading workers (default: 4)')
 parser.add_argument('-e', '--epoch', default=4, type=int)
 parser.add_argument('--print-freq', '-p', default=100, type=int, help='print frequency (default: 10)')
 args = parser.parse_args()
@@ -201,7 +201,7 @@ def run():
             'state_dict': model.state_dict(),
             'best_prec1': best_prec1,
             'optimizer': optm.state_dict(),
-        }, is_best)
+        }, is_best,filename='checkpoint_epoch_%s.pth.tar'%epoch)
 
 
 
