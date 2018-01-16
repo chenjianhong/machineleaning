@@ -13,7 +13,7 @@ parser.add_argument('data', metavar='DIR', help='path to dataset')
 parser.add_argument('-b', '--batch_size', help='batch_size', default=120, type=int)
 parser.add_argument('-w', '--workers', default=8, type=int, help='number of data loading workers (default: 4)')
 parser.add_argument('-e', '--epoch', default=90, type=int)
-parser.add_argument('--print-freq', '-p', default=100, type=int, help='print frequency (default: 10)')
+parser.add_argument('--print-freq', '-p', default=100, type=int, help='print frequency (default: 100)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 
 
