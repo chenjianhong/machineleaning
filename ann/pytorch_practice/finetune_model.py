@@ -64,7 +64,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
-    prev_end_time = time.time()
+    # prev_end_time = time.time()
 
     model.train()
 
@@ -82,13 +82,13 @@ def train(train_loader, model, criterion, optimizer, epoch):
         optimizer.step()
 
         prec1, prec5 = accuracy(o.data, y, topk=(1, 5))
-        batch_time.update(time.time() - prev_end_time)
-        data_time.update(time.time() - prev_end_time)
+        # batch_time.update(time.time() - prev_end_time)
+        # data_time.update(time.time() - prev_end_time)
         losses.update(loss.data[0], b_x.size(0))
         top1.update(prec1[0], b_x.size(0))
         top5.update(prec5[0], b_x.size(0))
 
-        prev_end_time = time.time()
+        # prev_end_time = time.time()
 
         if i % args.print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
@@ -112,7 +112,7 @@ def validate(val_loader, model, criterion):
     # switch to evaluate mode
     model.eval()
 
-    end = time.time()
+    # end = time.time()
     for i, (input, target) in enumerate(val_loader):
         target = target.cuda(async=True)
         input_var = torch.autograd.Variable(input, volatile=True).cuda()
@@ -129,8 +129,8 @@ def validate(val_loader, model, criterion):
         top5.update(prec5[0], input.size(0))
 
         # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
+        # batch_time.update(time.time() - end)
+        # end = time.time()
 
         if i % args.print_freq == 0:
             print('Test: [{0}/{1}]\t'
