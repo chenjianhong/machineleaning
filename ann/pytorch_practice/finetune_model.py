@@ -171,7 +171,7 @@ def run():
         ])
     )
 
-    train_loader = torch.utils.data.DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True,num_workers=args.workers,pin_memory=True)
+    train_loader = torch.utils.data.DataLoader(train_dataset,batch_size=args.batch_size,shuffle=True,num_workers=args.workers,pin_memory=False)
     val_loader = torch.utils.data.DataLoader(torchvision.datasets.ImageFolder(
         val_dir,
         torchvision.transforms.Compose([
@@ -180,7 +180,7 @@ def run():
             torchvision.transforms.ToTensor(),
             normalize,
         ])),
-        batch_size=args.batch_size,shuffle=True,num_workers=args.workers,pin_memory=True
+        batch_size=args.batch_size,shuffle=True,num_workers=args.workers,pin_memory=False
     )
 
 
