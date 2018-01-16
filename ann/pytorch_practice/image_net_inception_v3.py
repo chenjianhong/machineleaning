@@ -12,8 +12,11 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', help='path to dataset')
 parser.add_argument('-b', '--batch_size', help='batch_size', default=120, type=int)
 parser.add_argument('-w', '--workers', default=8, type=int, help='number of data loading workers (default: 4)')
-parser.add_argument('-e', '--epoch', default=4, type=int)
+parser.add_argument('-e', '--epoch', default=90, type=int)
 parser.add_argument('--print-freq', '-p', default=100, type=int, help='print frequency (default: 10)')
+parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
+
+
 args = parser.parse_args()
 
 class AverageMeter(object):
@@ -185,6 +188,20 @@ def run():
     optm = torch.optim.Adam(model.parameters())
 
     best_prec1 = 0
+
+    if args.resume:
+        if os.path.isfile(args.resume):
+            print("=> loading checkpoint '{}'".format(args.resume))
+            checkpoint = torch.load(args.resume)
+            best_prec1 = checkpoint['best_prec1']
+            model.load_state_dict(checkpoint['state_dict'])
+            optm.load_state_dict(checkpoint['optimizer'])
+            print("=> loaded checkpoint '{}' (best_prec1 {})"
+                  .format(args.resume, checkpoint['best_prec1']))
+        else:
+            print("=> no checkpoint found at '{}'".format(args.resume))
+
+
     for epoch in range(args.epoch):
         train(train_loader, model, loss_func, optm, epoch)
 
