@@ -53,10 +53,10 @@ def accuracy(output, target, topk=(1,)):
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best, filename='fineturn_epoch.pth.tar'):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(filename, 'fineturn_model_best.pth.tar')
 
 def train(train_loader, model, criterion, optimizer, epoch):
     batch_time = AverageMeter()
