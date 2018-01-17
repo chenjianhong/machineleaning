@@ -85,7 +85,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         loss.backward()
         optimizer.step()
 
-        prec1, prec5 = accuracy(o.data, y, topk=(1, 5))
+        prec1, prec5 = accuracy(sum(o).data, y, topk=(1, 2))
         batch_time.update(time.time() - prev_end_time)
         data_time.update(time.time() - prev_end_time)
         losses.update(loss.data[0], b_x.size(0))
@@ -123,11 +123,14 @@ def validate(val_loader, model, criterion):
         target_var = torch.autograd.Variable(target, volatile=True).cuda()
 
         # compute output
-        output = model(input_var)
-        loss = criterion(output, target_var)
+        o = model(input_var)
+        if isinstance(o, tuple):
+            loss = sum((criterion(i, target) for i in o))
+        else:
+            loss = criterion(o, target)
 
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+        prec1, prec5 = accuracy(sum(o).data, target, topk=(1, 2))
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0], input.size(0))
         top5.update(prec5[0], input.size(0))
