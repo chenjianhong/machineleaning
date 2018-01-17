@@ -125,9 +125,9 @@ def validate(val_loader, model, criterion):
         # compute output
         o = model(input_var)
         if isinstance(o, tuple):
-            loss = sum((criterion(i, target) for i in o))
+            loss = sum((criterion(i, target_var) for i in o))
         else:
-            loss = criterion(o, target)
+            loss = criterion(o, target_var)
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(sum(o).data, target, topk=(1, 2))
