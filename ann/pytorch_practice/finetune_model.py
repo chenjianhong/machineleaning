@@ -80,7 +80,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
             loss = sum((criterion(i, b_y) for i in o))
         else:
             loss = criterion(o, b_y)
-        loss = criterion(o, b_y)
 
         optimizer.zero_grad()
         loss.backward()
