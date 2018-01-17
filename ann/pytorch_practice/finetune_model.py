@@ -64,7 +64,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
-    # prev_end_time = time.time()
+    prev_end_time = time.time()
 
     model.train()
 
@@ -82,8 +82,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
         optimizer.step()
 
         prec1, prec5 = accuracy(o.data, y, topk=(1, 5))
-        # batch_time.update(time.time() - prev_end_time)
-        # data_time.update(time.time() - prev_end_time)
+        batch_time.update(time.time() - prev_end_time)
+        data_time.update(time.time() - prev_end_time)
         losses.update(loss.data[0], b_x.size(0))
         top1.update(prec1[0], b_x.size(0))
         top5.update(prec5[0], b_x.size(0))
@@ -112,7 +112,7 @@ def validate(val_loader, model, criterion):
     # switch to evaluate mode
     model.eval()
 
-    # end = time.time()
+    end = time.time()
     for i, (input, target) in enumerate(val_loader):
         target = target.cuda(async=True)
         input_var = torch.autograd.Variable(input, volatile=True).cuda()
@@ -129,8 +129,8 @@ def validate(val_loader, model, criterion):
         top5.update(prec5[0], input.size(0))
 
         # measure elapsed time
-        # batch_time.update(time.time() - end)
-        # end = time.time()
+        batch_time.update(time.time() - end)
+        end = time.time()
 
         if i % args.print_freq == 0:
             print('Test: [{0}/{1}]\t'
@@ -149,11 +149,7 @@ def validate(val_loader, model, criterion):
 
 def run():
     # model = torchvision.models.inception_v3(pretrained=False)
-    model = torchvision.models.resnet18(pretrained=False)
 
-    model = torch.nn.DataParallel(model).cuda()
-
-    parameters = model.parameters()
 
     train_dir = os.path.join(args.data,'train')
     val_dir = os.path.join(args.data,'val')
@@ -164,7 +160,7 @@ def run():
     train_dataset = torchvision.datasets.ImageFolder(
         train_dir,
         torchvision.transforms.Compose([
-            torchvision.transforms.RandomSizedCrop(224),
+            torchvision.transforms.RandomSizedCrop(299),
             torchvision.transforms.RandomHorizontalFlip(),
             torchvision.transforms.ToTensor(),
             normalize,
@@ -175,14 +171,17 @@ def run():
     val_loader = torch.utils.data.DataLoader(torchvision.datasets.ImageFolder(
         val_dir,
         torchvision.transforms.Compose([
-            torchvision.transforms.Scale(256),
-            torchvision.transforms.CenterCrop(224),
+            torchvision.transforms.Scale(320),
+            torchvision.transforms.CenterCrop(299),
             torchvision.transforms.ToTensor(),
             normalize,
         ])),
         batch_size=args.batch_size,shuffle=True,num_workers=args.workers,pin_memory=False
     )
 
+    # model = torchvision.models.resnet18(pretrained=False,num_classes=2)
+    model = torchvision.models.inception_v3(pretrained=False,num_classes=2)
+    parameters = model.parameters()
 
     if args.fine_tune_fc:
         labels = len(train_dataset.classes)
@@ -192,6 +191,7 @@ def run():
         model.fc = torch.nn.Linear(num_ftrs, labels)
         parameters = model.fc.parameters()
 
+    model = torch.nn.DataParallel(model).cuda()
     loss_func = torch.nn.CrossEntropyLoss().cuda()
     optm = torch.optim.Adam(parameters)
 
@@ -202,7 +202,6 @@ def run():
             checkpoint = torch.load(args.resume)
             best_prec1 = checkpoint['best_prec1']
             model.load_state_dict(checkpoint['state_dict'])
-            optm.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (best_prec1 {})"
                   .format(args.resume, checkpoint['best_prec1']))
         else:
@@ -234,7 +233,7 @@ def calculate_image_mean_and_std():
     train_dataset = torchvision.datasets.ImageFolder(
         train_dir,
         torchvision.transforms.Compose([
-            torchvision.transforms.RandomSizedCrop(224),
+            torchvision.transforms.RandomSizedCrop(299),
             torchvision.transforms.RandomHorizontalFlip(),
             torchvision.transforms.ToTensor(),
         ])
