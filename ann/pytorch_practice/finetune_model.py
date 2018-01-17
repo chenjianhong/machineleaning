@@ -78,14 +78,18 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # for nets that have multiple outputs such as inception
         if isinstance(o, tuple):
             loss = sum((criterion(i, b_y) for i in o))
+            zero_t = torch.cuda.FloatTensor(o[0].data.size()).zero_()
+            for _i in o:
+                zero_t.add_(_i)
         else:
             loss = criterion(o, b_y)
+            zero_t = o.data
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        prec1, prec5 = accuracy(sum(o).data, y, topk=(1, 2))
+        prec1, prec5 = accuracy(zero_t, y, topk=(1, 2))
         batch_time.update(time.time() - prev_end_time)
         data_time.update(time.time() - prev_end_time)
         losses.update(loss.data[0], b_x.size(0))
@@ -126,11 +130,15 @@ def validate(val_loader, model, criterion):
         o = model(input_var)
         if isinstance(o, tuple):
             loss = sum((criterion(i, target_var) for i in o))
+            zero_t = torch.cuda.FloatTensor(o[0].data.size()).zero_()
+            for _i in o:
+                zero_t.add_(_i)
         else:
             loss = criterion(o, target_var)
+            zero_t = o.data
 
         # measure accuracy and record loss
-        prec1, prec5 = accuracy(sum(o).data, target, topk=(1, 2))
+        prec1, prec5 = accuracy(zero_t, target, topk=(1, 2))
         losses.update(loss.data[0], input.size(0))
         top1.update(prec1[0], input.size(0))
         top5.update(prec5[0], input.size(0))
@@ -191,6 +199,7 @@ def run():
     labels = len(train_dataset.classes)
     num_ftrs = model.fc.in_features
     model.fc = torch.nn.Linear(num_ftrs, labels)
+    model.AuxLogits.fc = torch.nn.Linear(model.AuxLogits.fc.in_features, labels)
 
     if args.fine_tune_fc:
         for param in model.parameters():
