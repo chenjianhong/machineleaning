@@ -92,7 +92,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         top1.update(prec1[0], b_x.size(0))
         top5.update(prec5[0], b_x.size(0))
 
-        # prev_end_time = time.time()
+        prev_end_time = time.time()
 
         if i % args.print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
@@ -187,20 +187,20 @@ def run():
     )
 
     # model = torchvision.models.resnet18(pretrained=False,num_classes=2)
-    model = torchvision.models.inception_v3(pretrained=False,num_classes=2)
-    parameters = model.parameters()
+    model = torchvision.models.inception_v3(pretrained=True)
+    labels = len(train_dataset.classes)
+    num_ftrs = model.fc.in_features
+    model.fc = torch.nn.Linear(num_ftrs, labels)
 
     if args.fine_tune_fc:
-        labels = len(train_dataset.classes)
         for param in model.parameters():
             param.requires_grad = False
         num_ftrs = model.fc.in_features
         model.fc = torch.nn.Linear(num_ftrs, labels)
-        parameters = model.fc.parameters()
 
     model = torch.nn.DataParallel(model).cuda()
     loss_func = torch.nn.CrossEntropyLoss().cuda()
-    optm = torch.optim.Adam(parameters)
+    optm = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()))
 
     best_prec1 = 0
     if args.resume:
