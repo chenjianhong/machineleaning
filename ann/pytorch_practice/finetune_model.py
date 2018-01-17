@@ -75,6 +75,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         o = model(b_x)
 
+        # for nets that have multiple outputs such as inception
+        if isinstance(o, tuple):
+            loss = sum((criterion(i, b_y) for i in o))
+        else:
+            loss = criterion(o, b_y)
         loss = criterion(o, b_y)
 
         optimizer.zero_grad()
