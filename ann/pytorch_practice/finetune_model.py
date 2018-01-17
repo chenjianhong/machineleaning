@@ -80,7 +80,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
             loss = sum((criterion(i, b_y) for i in o))
             zero_t = torch.cuda.FloatTensor(o[0].data.size()).zero_()
             for _i in o:
-                zero_t.add_(_i)
+                zero_t.add_(_i.data)
         else:
             loss = criterion(o, b_y)
             zero_t = o.data
@@ -132,7 +132,7 @@ def validate(val_loader, model, criterion):
             loss = sum((criterion(i, target_var) for i in o))
             zero_t = torch.cuda.FloatTensor(o[0].data.size()).zero_()
             for _i in o:
-                zero_t.add_(_i)
+                zero_t.add_(_i.data)
         else:
             loss = criterion(o, target_var)
             zero_t = o.data
