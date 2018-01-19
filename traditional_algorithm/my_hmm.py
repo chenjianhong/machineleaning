@@ -24,7 +24,7 @@ class HMM(object):
             for end in self.hidden_states:
                 for start in self.hidden_states:
                     prob_seq_prob[i][end] += prob_seq_prob[i-1][start] * self.transfer_prob[start][end] if i > 1 else self.start_prob[start] * self.transfer_prob[start][end]
-                prob_seq_prob[i][end] = prob_seq_prob[i][end] * self.emit_prob[end]
+                prob_seq_prob[i][end] = prob_seq_prob[i][end] * self.emit_prob[end][s]
         return prob_seq_prob
 
     def evaluate(self,sequence):
